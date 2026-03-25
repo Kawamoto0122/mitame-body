@@ -20,7 +20,7 @@ const AREA_DATA = [
 ];
 
 export default function AnalysisPage() {
-  const { profile, updateProfile, weightRecords, userWeightRecords, setWeightRecords } = useAppContext();
+  const { profile, setProfile, weightRecords, setWeightRecords } = useAppContext();
   const [selectedArea, setSelectedArea] = useState(AREA_DATA[0]);
   const [weightInput, setWeightInput] = useState("");
   const [isProcessingOcr, setIsProcessingOcr] = useState(false);
@@ -41,7 +41,6 @@ export default function AnalysisPage() {
   const handleFakeOcr = () => {
     setIsProcessingOcr(true);
     setTimeout(() => {
-      // Dummy OCR random reading around current weight +- 1kg
       const baseWeight = profile.currentWeight || 60;
       const dummyWeight = Number((baseWeight + (Math.random() * 2 - 1)).toFixed(1));
       saveWeight(dummyWeight);
@@ -52,63 +51,63 @@ export default function AnalysisPage() {
   const saveWeight = (w: number) => {
     const newRecord: WeightRecord = {
       id: crypto.randomUUID(),
-      userId: profile.id,
       date: new Date().toISOString(),
       weight: w
     };
     const updatedRecords = [...weightRecords, newRecord].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     setWeightRecords(updatedRecords);
-    // Since setProfile doesn't exist anymore, we must use updateProfile? Wait. I should just update the profile correctly through updateProfile.
-    // I will call updateProfile instead of setProfile? Wait, my Context has `updateProfile`.
+    
+    // Update profile's current weight.
+    setProfile({ ...profile, currentWeight: w });
+    
     setWeightInput("");
   };
 
-  // Prepare chart data using user's records only
-  const chartData = userWeightRecords.map(r => ({
+  const chartData = weightRecords.map(r => ({
     date: format(new Date(r.date), "MM/dd"),
     weight: r.weight,
-  })).slice(-14); // Last 14 records
+  })).slice(-14);
 
   return (
-    <div className="p-4 space-y-6 pt-6 mb-8">
+    <div className="p-4 space-y-6 pt-6 mb-8 mt-4">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
           <ActivitySquare className="text-primary" />
           自己分析
         </h1>
-        <p className="text-sm text-gray-400 mt-1">体の知識と進捗のトラッキング</p>
+        <p className="text-sm text-slate-500 mt-1">体の知識と進捗のトラッキング</p>
       </div>
 
       {/* Progress & Weight Input */}
-      <div className="glass-panel p-5 space-y-4 relative overflow-hidden">
+      <div className="glass-panel bg-white p-5 space-y-4 relative overflow-hidden shadow-sm">
         <div className="flex justify-between items-center z-10 relative">
           <div>
-            <div className="text-sm text-gray-400 flex items-center gap-1"><Target size={14}/> 目標まであと</div>
-            <div className="text-3xl font-bold text-white">
+            <div className="text-sm font-bold text-slate-500 flex items-center gap-1"><Target size={14}/> 目標まであと</div>
+            <div className="text-3xl font-black text-slate-800 mt-1">
               {targetDiff !== null && Number(targetDiff) > 0 ? (
-                <>{targetDiff} <span className="text-sm font-normal text-gray-400">kg</span></>
+                <>{targetDiff} <span className="text-sm font-bold text-slate-500">kg</span></>
               ) : targetDiff !== null && Number(targetDiff) <= 0 ? (
-                <span className="text-emerald-400 text-xl font-bold">達成！</span>
+                <span className="text-emerald-500 text-xl font-bold">達成！</span>
               ) : (
                 "-"
               )}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-gray-400">現在の体重</div>
-            <div className="text-xl font-bold text-white">
-              {profile.currentWeight || "-"} <span className="text-sm font-normal text-gray-400">kg</span>
+            <div className="text-sm font-bold text-slate-500">現在の体重</div>
+            <div className="text-xl font-black text-slate-800 mt-1">
+              {profile.currentWeight || "-"} <span className="text-sm font-bold text-slate-500">kg</span>
             </div>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/10 relative z-10">
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">体重記録</h3>
+        <div className="pt-4 border-t border-slate-100 relative z-10">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">体重記録</h3>
           <div className="flex gap-2">
             <button 
               onClick={handleFakeOcr}
               disabled={isProcessingOcr}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg flex-shrink-0 transition-colors"
+              className="bg-indigo-100 text-indigo-600 hover:bg-indigo-200 p-2.5 rounded-xl flex-shrink-0 transition-colors shadow-sm"
             >
               {isProcessingOcr ? <Search className="animate-spin" size={20} /> : <Camera size={20} />}
             </button>
@@ -119,12 +118,12 @@ export default function AnalysisPage() {
                 placeholder="60.5"
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary font-bold shadow-sm"
               />
               <button
                 type="submit"
                 disabled={!weightInput}
-                className="bg-primary hover:bg-primary-focus disabled:opacity-50 text-white p-2 flex-shrink-0 rounded-lg transition-transform active:scale-95"
+                className="bg-primary hover:bg-primary-focus disabled:opacity-50 text-white p-2.5 flex-shrink-0 rounded-xl transition-transform active:scale-95 shadow-md shadow-primary/30"
               >
                 <Plus size={20} />
               </button>
@@ -135,22 +134,22 @@ export default function AnalysisPage() {
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="glass-panel p-4 h-64 mb-6">
-          <h3 className="text-sm font-bold text-gray-400 mb-4 flex items-center gap-2">
+        <div className="glass-panel bg-white p-4 h-64 mb-6 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-600 mb-4 flex items-center gap-2">
             <TrendingDown size={16} />
             体重推移
           </h3>
           <div className="w-full h-40">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#9ca3af" fontSize={12} domain={['dataMin - 1', 'dataMax + 1']} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} domain={['dataMin - 1', 'dataMax + 1']} tickLine={false} axisLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                  itemStyle={{ color: '#3b82f6', fontWeight: 'bold' }}
+                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                  itemStyle={{ color: '#0ea5e9', fontWeight: 'bold' }}
                 />
-                <Line type="monotone" dataKey="weight" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#1e3a8a' }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="weight" stroke="#0ea5e9" strokeWidth={3} dot={{ r: 4, fill: '#0ea5e9', strokeWidth: 2, stroke: '#ffffff' }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -159,16 +158,16 @@ export default function AnalysisPage() {
 
       {/* Area Selector Data */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white">部位別 落とし方</h2>
+        <h2 className="text-lg font-bold text-slate-800">部位別 落とし方</h2>
         <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
           {AREA_DATA.map((area) => (
             <button
               key={area.部位}
               onClick={() => setSelectedArea(area)}
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-bold transition-colors ${
                 selectedArea.部位 === area.部位
-                  ? "bg-primary text-white"
-                  : "bg-white/5 border border-white/10 text-gray-400"
+                  ? "bg-slate-800 text-white shadow-md"
+                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
             >
               {area.部位}
@@ -176,31 +175,31 @@ export default function AnalysisPage() {
           ))}
         </div>
 
-        <div className="glass-panel p-5 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="glass-panel bg-white p-5 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-sm">
           <div>
-            <div className="text-xs text-primary font-bold uppercase tracking-wider mb-1">狙い</div>
-            <div className="text-white font-medium">{selectedArea.狙い}</div>
+            <div className="text-xs text-primary font-black uppercase tracking-wider mb-1">狙い</div>
+            <div className="text-slate-800 font-bold text-lg">{selectedArea.狙い}</div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 p-3 rounded-lg">
-              <div className="text-xs text-emerald-400 font-bold mb-1">効果的な食べ物</div>
-              <div className="text-sm text-gray-200">{selectedArea.効果的な食べ物}</div>
+            <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+              <div className="text-xs text-emerald-600 font-black mb-1">効果的な食べ物</div>
+              <div className="text-sm font-medium text-slate-700">{selectedArea.効果的な食べ物}</div>
             </div>
-            <div className="bg-white/5 p-3 rounded-lg">
-              <div className="text-xs text-rose-400 font-bold mb-1">効果的な運動</div>
-              <div className="text-sm text-gray-200">{selectedArea.効果的な運動}</div>
+            <div className="bg-rose-50 border border-rose-100 p-3 rounded-xl">
+              <div className="text-xs text-rose-600 font-black mb-1">効果的な運動</div>
+              <div className="text-sm font-medium text-slate-700">{selectedArea.効果的な運動}</div>
             </div>
           </div>
 
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">理由</div>
-            <div className="text-sm text-gray-300">{selectedArea.理由}</div>
+            <div className="text-xs text-slate-400 font-black uppercase tracking-wider mb-1">理由</div>
+            <div className="text-sm font-medium text-slate-600">{selectedArea.理由}</div>
           </div>
 
-          <div className="bg-gradient-to-r from-indigo-500/20 to-transparent p-3 rounded-lg border-l-2 border-indigo-500">
-            <div className="text-xs text-indigo-300 font-bold mb-1">ポイント</div>
-            <div className="text-sm text-white font-bold">{selectedArea.ポイント}</div>
+          <div className="bg-sky-50 p-4 rounded-xl border-l-4 border-sky-400">
+            <div className="text-xs text-sky-600 font-black mb-1">ポイント</div>
+            <div className="text-sm text-slate-800 font-black">{selectedArea.ポイント}</div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import BottomNav from "@/components/Layout/BottomNav";
-import UserSelect from "@/components/Account/UserSelect";
+import AuthGuard from "@/components/Account/AuthGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,15 +31,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppProvider>
-          <UserSelect />
-          {/* Main content area with padding bottom to accommodate the nav */}
-          <main className="min-h-screen pb-20 max-w-md mx-auto relative overflow-x-hidden">
-            {children}
-          </main>
-          
-          <div className="max-w-md mx-auto relative">
-            <BottomNav />
-          </div>
+          <AuthGuard>
+            {/* Main content area with padding bottom to accommodate the nav */}
+            <main className="min-h-screen pb-20 max-w-md mx-auto relative overflow-x-hidden">
+              {children}
+            </main>
+            
+            <div className="max-w-md mx-auto relative">
+              <BottomNav />
+            </div>
+          </AuthGuard>
         </AppProvider>
       </body>
     </html>

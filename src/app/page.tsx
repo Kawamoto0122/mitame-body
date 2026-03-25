@@ -18,7 +18,7 @@ const QUOTES = [
 ];
 
 export default function Home() {
-  const { profile, userWeightRecords } = useAppContext();
+  const { profile, weightRecords } = useAppContext();
 
   // Pick a stable quote based on the day of the year
   const quote = useMemo(() => {
@@ -27,12 +27,12 @@ export default function Home() {
   }, []);
 
   const requiresMeasurement = useMemo(() => {
-    if (userWeightRecords.length === 0) return true;
-    const sorted = [...userWeightRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (weightRecords.length === 0) return true;
+    const sorted = [...weightRecords].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const latest = sorted[0];
     const daysSince = differenceInDays(new Date(), new Date(latest.date));
     return daysSince >= 7;
-  }, [userWeightRecords]);
+  }, [weightRecords]);
 
   if (!profile) return null;
 
@@ -56,11 +56,11 @@ export default function Home() {
       </div>
 
       {requiresMeasurement && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex items-start gap-3 backdrop-blur-md">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle className="text-red-500 shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-red-500 font-bold mb-1">体重計測のお願い</h3>
-            <p className="text-sm text-red-200">
+            <h3 className="text-red-600 font-bold mb-1">体重計測のお願い</h3>
+            <p className="text-sm text-red-500">
               1週間以上、体重の記録がありません。自己分析画面から記録を追加し、現状を把握しましょう！
             </p>
           </div>
@@ -81,13 +81,13 @@ export default function Home() {
           <div className="flex items-end gap-2">
             {targetDiff !== null && Number(targetDiff) > 0 ? (
               <>
-                <span className="text-5xl font-black text-white">{targetDiff}</span>
-                <span className="text-xl text-gray-400 mb-1">kg</span>
+                <span className="text-5xl font-black text-slate-800">{targetDiff}</span>
+                <span className="text-xl text-slate-500 mb-1">kg</span>
               </>
             ) : targetDiff !== null && Number(targetDiff) <= 0 ? (
-              <span className="text-3xl font-bold text-emerald-400">目標達成！🎉</span>
+              <span className="text-3xl font-bold text-emerald-500">目標達成！🎉</span>
             ) : (
-              <span className="text-xl text-gray-400">データがありません</span>
+              <span className="text-xl text-slate-500">データがありません</span>
             )}
           </div>
 
@@ -103,12 +103,12 @@ export default function Home() {
       </div>
 
       {/* Quote Card */}
-      <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-xl p-6 relative">
-        <div className="absolute -top-3 -left-2 text-6xl text-indigo-400 opacity-20 font-serif">"</div>
-        <h2 className="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl p-6 relative">
+        <div className="absolute -top-3 -left-2 text-6xl text-indigo-300 opacity-20 font-serif">"</div>
+        <h2 className="text-sm font-bold text-indigo-600 mb-2 flex items-center gap-2">
           <Info size={16} /> 今日のひとこと
         </h2>
-        <p className="text-lg font-bold text-white leading-relaxed pt-2">
+        <p className="text-lg font-bold text-slate-800 leading-relaxed pt-2">
           {quote}
         </p>
       </div>

@@ -5,65 +5,39 @@ import { UserProfile, WeightRecord, FoodRecord } from "@/types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 interface AppContextType {
-  users: UserProfile[];
-  setUsers: (users: UserProfile[]) => void;
-  currentUserId: string | null;
-  setCurrentUserId: (id: string | null) => void;
   profile: UserProfile | null;
-  updateProfile: (profile: UserProfile) => void;
+  setProfile: (profile: UserProfile | null) => void;
   weightRecords: WeightRecord[];
   setWeightRecords: (records: WeightRecord[]) => void;
   foodRecords: FoodRecord[];
   setFoodRecords: (records: FoodRecord[]) => void;
-  userWeightRecords: WeightRecord[];
-  userFoodRecords: FoodRecord[];
   logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  // Use new keys mitame_v2_* to clear old local memory
-  const [users, setUsers] = useLocalStorage<UserProfile[]>("mitame_v2_users", []);
-  const [currentUserId, setCurrentUserId] = useLocalStorage<string | null>("mitame_v2_currentUserId", null);
-  const [weightRecords, setWeightRecords] = useLocalStorage<WeightRecord[]>("mitame_v2_weight_records", []);
-  const [foodRecords, setFoodRecords] = useLocalStorage<FoodRecord[]>("mitame_v2_food_records", []);
-
-  const profile = users.find(u => u.id === currentUserId) || null;
-
-  const updateProfile = (updatedProfile: UserProfile) => {
-    setUsers(prev => {
-      const exists = prev.find(p => p.id === updatedProfile.id);
-      if (exists) {
-        return prev.map(p => p.id === updatedProfile.id ? updatedProfile : p);
-      }
-      return [...prev, updatedProfile];
-    });
-    if (!currentUserId) setCurrentUserId(updatedProfile.id);
-  };
+  // Use new keys mitame_v3_* to clear old local memory and match the new architecture
+  const [profile, setProfile] = useLocalStorage<UserProfile | null>("mitame_v3_profile", null);
+  const [weightRecords, setWeightRecords] = useLocalStorage<WeightRecord[]>("mitame_v3_weight_records", []);
+  const [foodRecords, setFoodRecords] = useLocalStorage<FoodRecord[]>("mitame_v3_food_records", []);
 
   const logout = () => {
-    setCurrentUserId(null);
+    // Clear the current user profile
+    setProfile(null);
+    setWeightRecords([]);
+    setFoodRecords([]);
   };
-
-  const userWeightRecords = currentUserId ? weightRecords.filter(r => r.userId === currentUserId) : [];
-  const userFoodRecords = currentUserId ? foodRecords.filter(r => r.userId === currentUserId) : [];
 
   return (
     <AppContext.Provider
       value={{
-        users,
-        setUsers,
-        currentUserId,
-        setCurrentUserId,
         profile,
-        updateProfile,
+        setProfile,
         weightRecords,
         setWeightRecords,
         foodRecords,
         setFoodRecords,
-        userWeightRecords,
-        userFoodRecords,
         logout,
       }}
     >
