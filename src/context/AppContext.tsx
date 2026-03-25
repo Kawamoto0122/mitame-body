@@ -17,10 +17,10 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  // Use new keys mitame_v3_* to clear old local memory and match the new architecture
-  const [profile, setProfile] = useLocalStorage<UserProfile | null>("mitame_v3_profile", null);
-  const [weightRecords, setWeightRecords] = useLocalStorage<WeightRecord[]>("mitame_v3_weight_records", []);
-  const [foodRecords, setFoodRecords] = useLocalStorage<FoodRecord[]>("mitame_v3_food_records", []);
+  // Use new keys mitame_v4_* to reset everything to a clean state
+  const [profile, setProfile] = useLocalStorage<UserProfile | null>("mitame_v4_profile", null);
+  const [weightRecords, setWeightRecords] = useLocalStorage<WeightRecord[]>("mitame_v4_weight_records", []);
+  const [foodRecords, setFoodRecords] = useLocalStorage<FoodRecord[]>("mitame_v4_food_records", []);
 
   const logout = () => {
     // Clear the current user profile
