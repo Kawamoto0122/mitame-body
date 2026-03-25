@@ -8,7 +8,7 @@ import { Utensils, Camera, Plus, Flame, Beef, Image as ImageIcon, Edit2, Trash2,
 import type { FoodRecord } from "@/types";
 
 export default function FoodPage() {
-  const { profile, foodRecords, setFoodRecords } = useAppContext();
+  const { profile, foodRecords, addFoodRecord, updateFoodRecord, deleteFoodRecord } = useAppContext();
   const [calories, setCalories] = useState<string>("");
   const [protein, setProtein] = useState<string>("");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
@@ -28,17 +28,15 @@ export default function FoodPage() {
   const totalCalories = todaysRecords.reduce((sum, r) => sum + r.calories, 0);
   const totalProtein = todaysRecords.reduce((sum, r) => sum + r.protein, 0);
 
-  const handleManualSubmit = (e: React.FormEvent) => {
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!calories || !protein) return;
 
     if (editingId) {
-      const updated = foodRecords.map(r => 
-        r.id === editingId 
-          ? { ...r, calories: Number(calories), protein: Number(protein) } 
-          : r
-      );
-      setFoodRecords(updated);
+      const existing = foodRecords.find(r => r.id === editingId);
+      if (existing) {
+        await updateFoodRecord({ ...existing, calories: Number(calories), protein: Number(protein) });
+      }
       setEditingId(null);
     } else {
       const newRecord: FoodRecord = {
@@ -48,7 +46,7 @@ export default function FoodPage() {
         protein: Number(protein),
         isAiGenerated: false
       };
-      setFoodRecords([...foodRecords, newRecord]);
+      await addFoodRecord(newRecord);
     }
 
     setCalories("");
@@ -62,9 +60,9 @@ export default function FoodPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("この食事記録を削除してよろしいですか？")) {
-      setFoodRecords(foodRecords.filter(r => r.id !== id));
+      await deleteFoodRecord(id);
       if (editingId === id) {
         setEditingId(null);
         setCalories("");
@@ -117,7 +115,7 @@ export default function FoodPage() {
           imageUrl: dataUrl 
         };
         
-        setFoodRecords([...foodRecords, newRecord]);
+        addFoodRecord(newRecord);
         setIsAiProcessing(false);
       }, 1500);
     };

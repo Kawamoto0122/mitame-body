@@ -2,26 +2,27 @@
 
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { Gender } from "@/types";
+import { Gender, UserProfile } from "@/types";
 
 interface ProfileSetupProps {
   onCancel?: () => void;
+  initialProfile?: UserProfile;
 }
 
-export default function ProfileSetup({ onCancel }: ProfileSetupProps) {
-  const { setProfile } = useAppContext();
+export default function ProfileSetup({ onCancel, initialProfile }: ProfileSetupProps) {
+  const { saveProfile } = useAppContext();
   
-  const [name, setName] = useState<string>("");
-  const [age, setAge] = useState<string>("");
-  const [gender, setGender] = useState<Gender>("male");
-  const [height, setHeight] = useState<string>("");
-  const [currentWeight, setCurrentWeight] = useState<string>("");
-  const [goalWeight, setGoalWeight] = useState<string>("");
+  const [name, setName] = useState<string>(initialProfile?.name || "");
+  const [age, setAge] = useState<string>(initialProfile?.age ? String(initialProfile.age) : "");
+  const [gender, setGender] = useState<Gender>(initialProfile?.gender || "male");
+  const [height, setHeight] = useState<string>(initialProfile?.height ? String(initialProfile.height) : "");
+  const [currentWeight, setCurrentWeight] = useState<string>(initialProfile?.currentWeight ? String(initialProfile.currentWeight) : "");
+  const [goalWeight, setGoalWeight] = useState<string>(initialProfile?.goalWeight ? String(initialProfile.goalWeight) : "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfile({
-      id: crypto.randomUUID(), // New user gets new ID
+    await saveProfile({
+      id: initialProfile?.id || crypto.randomUUID(),
       name,
       age: Number(age),
       gender,
@@ -36,8 +37,8 @@ export default function ProfileSetup({ onCancel }: ProfileSetupProps) {
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-sky-50/90 backdrop-blur-md">
       <div className="glass-panel w-full max-w-sm p-6 overflow-y-auto max-h-[90vh]">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">プロフィール作成</h2>
-          <p className="text-sm text-slate-500">新しいアカウントの情報を入力してください</p>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">{initialProfile ? "プロフィールの編集" : "プロフィール作成"}</h2>
+          <p className="text-sm text-slate-500">{initialProfile ? "プロフィール情報を更新します" : "新しいアカウントの情報を入力してください"}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,7 +131,7 @@ export default function ProfileSetup({ onCancel }: ProfileSetupProps) {
               type="submit"
               className="flex-[2] bg-primary hover:bg-primary-focus text-white font-bold py-3 rounded-lg transition-transform active:scale-95 shadow-md shadow-primary/30"
             >
-              作成する
+              {initialProfile ? "更新する" : "作成する"}
             </button>
           </div>
         </form>

@@ -20,7 +20,7 @@ const AREA_DATA = [
 ];
 
 export default function AnalysisPage() {
-  const { profile, setProfile, weightRecords, setWeightRecords } = useAppContext();
+  const { profile, saveProfile, weightRecords, addWeightRecord } = useAppContext();
   const [selectedArea, setSelectedArea] = useState(AREA_DATA[0]);
   const [weightInput, setWeightInput] = useState("");
   const [isProcessingOcr, setIsProcessingOcr] = useState(false);
@@ -48,17 +48,16 @@ export default function AnalysisPage() {
     }, 1500);
   };
 
-  const saveWeight = (w: number) => {
+  const saveWeight = async (w: number) => {
     const newRecord: WeightRecord = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       weight: w
     };
-    const updatedRecords = [...weightRecords, newRecord].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    setWeightRecords(updatedRecords);
+    await addWeightRecord(newRecord);
     
     // Update profile's current weight.
-    setProfile({ ...profile, currentWeight: w });
+    await saveProfile({ ...profile, currentWeight: w });
     
     setWeightInput("");
   };
