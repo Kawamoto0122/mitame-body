@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAppContext } from "@/context/AppContext";
@@ -38,14 +38,23 @@ export default function AnalysisPage() {
     saveWeight(Number(weightInput));
   };
 
-  const handleFakeOcr = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFakeOcr = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsProcessingOcr(true);
+    // 擬似的なOCR処理（数秒待ってからランダムな体重を入力）
     setTimeout(() => {
       const baseWeight = profile.currentWeight || 60;
       const dummyWeight = Number((baseWeight + (Math.random() * 2 - 1)).toFixed(1));
       saveWeight(dummyWeight);
       setIsProcessingOcr(false);
     }, 1500);
+
+    // 同じファイルを再度選べるようにリセット
+    e.target.value = "";
   };
 
   const saveWeight = async (w: number) => {
@@ -69,6 +78,15 @@ export default function AnalysisPage() {
 
   return (
     <div className="p-4 space-y-6 pt-6 mb-8 mt-4">
+      {/* Hidden File Input */}
+      <input 
+        type="file" 
+        accept="image/*" 
+        className="hidden" 
+        ref={fileInputRef} 
+        onChange={handleFakeOcr} 
+      />
+
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
           <ActivitySquare className="text-primary" />
@@ -104,7 +122,7 @@ export default function AnalysisPage() {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">体重記録</h3>
           <div className="flex gap-2">
             <button 
-              onClick={handleFakeOcr}
+              onClick={() => fileInputRef.current?.click()}
               disabled={isProcessingOcr}
               className="bg-indigo-100 text-indigo-600 hover:bg-indigo-200 p-2.5 rounded-xl flex-shrink-0 transition-colors shadow-sm"
             >
