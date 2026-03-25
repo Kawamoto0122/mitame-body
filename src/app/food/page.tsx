@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useAppContext } from "@/context/AppContext";
-import { Utensils, Camera, Plus, Flame, Beef, Image as ImageIcon, Edit2, Trash2, X } from "lucide-react";
+import { Utensils, Camera, Plus, Flame, Beef, Image as ImageIcon, Edit2, Trash2, X, CheckCircle2 } from "lucide-react";
 import type { FoodRecord } from "@/types";
 
 export default function FoodPage() {
@@ -117,7 +117,7 @@ export default function FoodPage() {
           imageUrl: dataUrl 
         };
         
-        setFoodRecords((prev) => [...prev, newRecord]);
+        setFoodRecords([...foodRecords, newRecord]);
         setIsAiProcessing(false);
       }, 1500);
     };
