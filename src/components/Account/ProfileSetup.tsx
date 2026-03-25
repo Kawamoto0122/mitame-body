@@ -9,7 +9,7 @@ interface ProfileSetupProps {
 }
 
 export default function ProfileSetup({ onCancel }: ProfileSetupProps) {
-  const { updateProfile } = useAppContext();
+  const { setProfile } = useAppContext();
   
   const [name, setName] = useState<string>("");
   const [age, setAge] = useState<string>("");
@@ -20,7 +20,7 @@ export default function ProfileSetup({ onCancel }: ProfileSetupProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({
+    setProfile({
       id: crypto.randomUUID(), // New user gets new ID
       name,
       age: Number(age),
